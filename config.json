@@ -1,0 +1,11 @@
+{
+  "apiUrl": "https://ecw.excelindia.com/svkmprinttest/PrintDashboard",
+  "devprinterName": "Brother DCP-T700W Printer",
+  "isdevenv": "no",
+  "isslient": "no",
+  "isprintBackground": "no",
+  "printSettings": {
+    "pageSize": "A4",
+    "margins": "none"
+  }
+}

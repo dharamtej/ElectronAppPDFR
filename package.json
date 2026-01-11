@@ -1,0 +1,63 @@
+{
+  "name": "quesmatrix",
+  "version": "1.0.9",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "build": "electron-builder",
+    "publish": "electron-builder --publish always",
+    "dist": "electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dharamtej/electron-app.git"
+  },
+  "build": {
+    "appId": "com.quesmatrix.test",
+    "productName": "quesmatrix",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "dharamtej",
+        "repo": "electron-app"
+      }
+    ],
+    "win": {
+      "target": [{
+        "target": "nsis",
+        "arch": ["x64"]
+      }],
+      "icon": "build/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.utilities",
+      "icon": "build/icon.icns"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility",
+      "icon": "build/icon.png"
+    }
+  },
+  "devDependencies": {
+    "@types/electron": "^1.4.38",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.4.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  }
+}
