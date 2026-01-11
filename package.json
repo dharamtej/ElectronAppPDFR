@@ -15,7 +15,7 @@
   "description": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dharamtej/electron-app.git"
+    "url": "https://github.com/dharamtej/ElectronAppPDFR.git"
   },
   "build": {
     "appId": "com.quesmatrix.test",
@@ -24,7 +24,7 @@
       {
         "provider": "github",
         "owner": "dharamtej",
-        "repo": "electron-app"
+        "repo": "ElectronAppPDFR"
       }
     ],
     "win": {
