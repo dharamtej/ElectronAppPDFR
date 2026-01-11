@@ -1,6 +1,6 @@
 {
-  "name": "quesmatrix",
-  "version": "1.0.1",
+  "name": "quesmatrix-qpprint",
+  "version": "0.9.0",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -19,7 +19,7 @@
   },
   "build": {
     "appId": "com.quesmatrix.test",
-    "productName": "quesmatrix",
+    "productName": "QuesMatrix-QPPrint",
     "publish": [
       {
         "provider": "github",

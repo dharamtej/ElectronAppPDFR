@@ -98,7 +98,17 @@ function createWindow() {
 
   // Resolve absolute path to index.html
   const printurl = config.apiUrl;
+  // const indexPath = path.resolve(__dirname, 'index.html');
+  // const indexUrl = pathToFileURL(indexPath).toString();
   mainWindow.loadURL(printurl);
+
+  // Check for updates after window loads
+  mainWindow.webContents.once('did-finish-load', () => {
+    // Check for updates 5 seconds after app starts
+    setTimeout(() => {
+      checkForUpdates();
+    }, 5000);
+  });
 
   ipcMain.on("print-html-content", (event, htmlString, printerName) => {
     printerName = isdevenv ? devprinterName : printerName;
@@ -124,7 +134,6 @@ function createMenu() {
       submenu: [
         {
           label: 'Exit',
-          accelerator: 'Alt+F4',
           click: () => {
             app.quit();
           }
@@ -141,7 +150,7 @@ function createMenu() {
           }
         },
         {
-          label: 'Current version',
+          label: 'About',
           click: () => {
             showCurrentVersion();
           }
@@ -184,59 +193,6 @@ function showCurrentVersion() {
     title: 'Current Version',
     message: `Current version: ${currentVersion}`,
     buttons: ['OK']
-  });
-
-  ipcMain.on("print-bytes-file", (event, bytes, printerName) => {
-    printerName = isdevenv ? devprinterName : printerName;
-    const buffer = Buffer.from(bytes);
-    // Write to a temporary file (e.g., HTML or PDF)
-    const tempPath = path.join(app.getPath("temp"), "qp.pdf");
-    console.log(tempPath);
-    fs.writeFileSync(tempPath, buffer);
-    // Load into hidden window for printing
-    const printWin = new BrowserWindow({ show: false });
-    printWin.loadFile(tempPath);
-    printWin.webContents.on("did-finish-load", () => {
-      printWin.webContents.print({
-        silent: isslient,
-        printBackground: isprintBackground,
-        deviceName: printerName,
-      });
-    });
-  });
-
-  ipcMain.on("print-buffer-new", async (event, pdfbytes, printerName) => {
-    try {
-      printerName = isdevenv ? devprinterName : printerName;
-      const win = new BrowserWindow({ show: false });
-      // hidden window // Load the PDF into the window
-      const base64Data = Buffer.from(pdfbytes).toString("base64");
-      const dataUrl = `data:application/pdf;base64,${base64Data}`;
-      await win.loadURL(dataUrl);
-      // Silent print
-      win.webContents.print(
-        {
-          silent: isslient,
-          printBackground: isprintBackground,
-          deviceName: printerName,
-          pageSize: "A4",
-          margins: { marginType: "none" },
-        },
-        (success, failureReason) => {
-          if (success) {
-            event.reply("print-buffer-new-result", { success: true });
-          } else {
-            console.error("Print failed:", failureReason);
-            event.reply("print-buffer-new-result", {
-              success: false,
-              error: failureReason || "Unknown error",
-            });
-          }
-        }
-      );
-    } catch (err) {
-      console.error("Error in print-buffer handler:", err);
-    }
   });
 }
 
@@ -363,6 +319,59 @@ function checkForUpdates() {
 // IPC Handlers
 ipcMain.on('check-for-updates', () => {
   checkForUpdates();
+});
+
+ipcMain.on("print-bytes-file", (event, bytes, printerName) => {
+  printerName = isdevenv ? devprinterName : printerName;
+  const buffer = Buffer.from(bytes);
+  // Write to a temporary file (e.g., HTML or PDF)
+  const tempPath = path.join(app.getPath("temp"), "qp.pdf");
+  console.log(tempPath);
+  fs.writeFileSync(tempPath, buffer);
+  // Load into hidden window for printing
+  const printWin = new BrowserWindow({ show: false });
+  printWin.loadFile(tempPath);
+  printWin.webContents.on("did-finish-load", () => {
+    printWin.webContents.print({
+      silent: isslient,
+      printBackground: isprintBackground,
+      deviceName: printerName,
+    });
+  });
+});
+
+ipcMain.on("print-buffer-new", async (event, pdfbytes, printerName) => {
+  try {
+    printerName = isdevenv ? devprinterName : printerName;
+    const win = new BrowserWindow({ show: false });
+    // hidden window // Load the PDF into the window
+    const base64Data = Buffer.from(pdfbytes).toString("base64");
+    const dataUrl = `data:application/pdf;base64,${base64Data}`;
+    await win.loadURL(dataUrl);
+    // Silent print
+    win.webContents.print(
+      {
+        silent: isslient,
+        printBackground: isprintBackground,
+        deviceName: printerName,
+        pageSize: "A4",
+        margins: { marginType: "none" },
+      },
+      (success, failureReason) => {
+        if (success) {
+          event.reply("print-buffer-new-result", { success: true });
+        } else {
+          console.error("Print failed:", failureReason);
+          event.reply("print-buffer-new-result", {
+            success: false,
+            error: failureReason || "Unknown error",
+          });
+        }
+      }
+    );
+  } catch (err) {
+    console.error("Error in print-buffer handler:", err);
+  }
 });
 
 

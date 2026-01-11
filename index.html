@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quesmatrix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .feature h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Quesmatrix App 1.0.1</h1>
+        <p>Your Electron application is running successfully!</p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>🚀 Fast</h3>
+                <p>Built with Electron for cross-platform compatibility</p>
+            </div>
+            <div class="feature">
+                <h3>🔄 Auto-Updates</h3>
+                <p>Automatic updates keep your app current</p>
+            </div>
+            <div class="feature">
+                <h3>🖨️ Print Ready</h3>
+                <p>Integrated printing capabilities</p>
+            </div>
+        </div>
+        
+        <div class="status" id="status">
+            Ready
+        </div>
+    </div>
+
+    <script>
+        // Listen for update status messages
+        if (window.electronAPI) {
+            window.electronAPI.onUpdateStatus((status) => {
+                document.getElementById('status').textContent = status;
+            });
+        }
+    </script>
+</body>
+</html>
