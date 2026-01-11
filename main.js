@@ -179,15 +179,6 @@ function checkForUpdatesMenu() {
     return;
   }
 
-  // Show checking dialog without buttons initially
-  updateDialogMessage = dialog.showMessageBox(mainWindow, {
-    type: 'info',
-    title: 'QuesMatrix-QPPrint',
-    message: 'Checking for updates...',
-    buttons: [],
-    noLink: true
-  });
-  
   // Set flag to show dialog for manual check
   global.showUpdateDialog = true;
   autoUpdater.checkForUpdates();
@@ -241,15 +232,12 @@ autoUpdater.on('update-not-available', (info) => {
   // Show result dialog when checking from menu
   if (global.showUpdateDialog) {
     const currentVersion = app.getVersion();
-    // Close the checking dialog and show result
-    setTimeout(() => {
-      dialog.showMessageBox(mainWindow, {
-        type: 'info',
-        title: 'QuesMatrix-QPPrint',
-        message: `You are using the latest version: ${currentVersion}`,
-        buttons: ['OK']
-      });
-    }, 500);
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'QuesMatrix-QPPrint',
+      message: `You are using the latest version: ${currentVersion}`,
+      buttons: ['OK']
+    });
     global.showUpdateDialog = false; // Reset flag
   }
 });
