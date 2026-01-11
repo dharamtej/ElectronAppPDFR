@@ -163,25 +163,33 @@ function createMenu() {
   Menu.setApplicationMenu(menu);
 }
 
+// Global variable to store the update dialog window
+let updateDialog = null;
+let updateDialogMessage = null;
+
 // Function to check for updates from menu
 function checkForUpdatesMenu() {
   if (process.env.NODE_ENV === 'development' || !app.isPackaged) {
     dialog.showMessageBox(mainWindow, {
       type: 'info',
-      title: 'Update Check',
+      title: 'QuesMatrix-QPPrint',
       message: 'Development mode - updates disabled',
       buttons: ['OK']
     });
     return;
   }
 
-  dialog.showMessageBox(mainWindow, {
+  // Show checking dialog without buttons initially
+  updateDialogMessage = dialog.showMessageBox(mainWindow, {
     type: 'info',
-    title: 'Checking for Updates',
+    title: 'QuesMatrix-QPPrint',
     message: 'Checking for updates...',
-    buttons: ['OK']
+    buttons: [],
+    noLink: true
   });
-
+  
+  // Set flag to show dialog for manual check
+  global.showUpdateDialog = true;
   autoUpdater.checkForUpdates();
 }
 
@@ -190,7 +198,7 @@ function showCurrentVersion() {
   const currentVersion = app.getVersion();
   dialog.showMessageBox(mainWindow, {
     type: 'info',
-    title: 'Current Version',
+    title: 'QuesMatrix-QPPrint',
     message: `Current version: ${currentVersion}`,
     buttons: ['OK']
   });
@@ -211,7 +219,7 @@ autoUpdater.on('update-available', (info) => {
   // Show dialog to user
   dialog.showMessageBox(mainWindow, {
     type: 'info',
-    title: 'Update Available',
+    title: 'QuesMatrix-QPPrint',
     message: `Update Available`,
     detail: `Current version: ${currentVersion}\nLatest version: ${info.version}\n\nWould you like to install the latest version?`,
     buttons: ['Install Now', 'Install Later'],
@@ -230,14 +238,19 @@ autoUpdater.on('update-not-available', (info) => {
   console.log('Update not available:', info);
   sendStatusToWindow('App is up to date.');
   
-  // Show dialog when checking from menu
-  if (mainWindow) {
-    dialog.showMessageBox(mainWindow, {
-      type: 'info',
-      title: 'No Updates',
-      message: 'You are using the latest version.',
-      buttons: ['OK']
-    });
+  // Show result dialog when checking from menu
+  if (global.showUpdateDialog) {
+    const currentVersion = app.getVersion();
+    // Close the checking dialog and show result
+    setTimeout(() => {
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'QuesMatrix-QPPrint',
+        message: `You are using the latest version: ${currentVersion}`,
+        buttons: ['OK']
+      });
+    }, 500);
+    global.showUpdateDialog = false; // Reset flag
   }
 });
 
@@ -247,7 +260,7 @@ autoUpdater.on('error', (err) => {
   sendStatusToWindow('Update error: ' + err.message);
   
   // Show error dialog to user
-  dialog.showErrorBox('Update Error', 
+  dialog.showErrorBox('QuesMatrix-QPPrint', 
     `Failed to update: ${err.message}\n\nTry running as administrator or check antivirus settings.`);
 });
 
@@ -272,7 +285,7 @@ autoUpdater.on('update-downloaded', (info) => {
   // Show dialog to install now or later
   dialog.showMessageBox(mainWindow, {
     type: 'info',
-    title: 'Update Ready',
+    title: 'QuesMatrix-QPPrint',
     message: 'Update has been downloaded.',
     detail: 'The application will restart to install the update. Make sure to run as administrator if needed.',
     buttons: ['Restart Now', 'Restart Later'],
