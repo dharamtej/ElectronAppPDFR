@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require("electron");
 const { autoUpdater } = require('electron-updater');
 const path = require("path");
 const { pathToFileURL } = require("url");
@@ -9,6 +9,7 @@ const preloadPath = path.resolve(__dirname, "preload.js");
 const { PrintManager } = require("./printManager");
 
 let printManager;
+let mainWindow;
 
 
 // Configure auto-updater
@@ -69,7 +70,7 @@ function createWindow() {
   console.log("Preload path:", preloadPath);
   console.log("Exists:", fs.existsSync(preloadPath));
 
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1000,
     height: 800,
     webPreferences: {
@@ -92,9 +93,12 @@ function createWindow() {
 
   //win.webContents.openDevTools();
 
+  // Create custom menu
+  createMenu();
+
   // Resolve absolute path to index.html
   const printurl = config.apiUrl;
-  win.loadURL(printurl);
+  mainWindow.loadURL(printurl);
 
   ipcMain.on("print-html-content", (event, htmlString, printerName) => {
     printerName = isdevenv ? devprinterName : printerName;
@@ -109,6 +113,77 @@ function createWindow() {
         deviceName: printerName,
       });
     });
+  });
+}
+
+// Create custom menu
+function createMenu() {
+  const template = [
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Exit',
+          accelerator: 'Alt+F4',
+          click: () => {
+            app.quit();
+          }
+        }
+      ]
+    },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'Check for updates',
+          click: () => {
+            checkForUpdatesMenu();
+          }
+        },
+        {
+          label: 'Current version',
+          click: () => {
+            showCurrentVersion();
+          }
+        }
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+}
+
+// Function to check for updates from menu
+function checkForUpdatesMenu() {
+  if (process.env.NODE_ENV === 'development' || !app.isPackaged) {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Update Check',
+      message: 'Development mode - updates disabled',
+      buttons: ['OK']
+    });
+    return;
+  }
+
+  dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    title: 'Checking for Updates',
+    message: 'Checking for updates...',
+    buttons: ['OK']
+  });
+
+  autoUpdater.checkForUpdates();
+}
+
+// Function to show current version
+function showCurrentVersion() {
+  const currentVersion = app.getVersion();
+  dialog.showMessageBox(mainWindow, {
+    type: 'info',
+    title: 'Current Version',
+    message: `Current version: ${currentVersion}`,
+    buttons: ['OK']
   });
 
   ipcMain.on("print-bytes-file", (event, bytes, printerName) => {
@@ -175,18 +250,20 @@ autoUpdater.on('checking-for-update', () => {
 autoUpdater.on('update-available', (info) => {
   console.log('Update available:', info);
   
+  const currentVersion = app.getVersion();
+  
   // Show dialog to user
   dialog.showMessageBox(mainWindow, {
     type: 'info',
     title: 'Update Available',
-    message: `A new version (${info.version}) is available!`,
-    detail: 'Do you want to download it now?',
-    buttons: ['Download', 'Later'],
+    message: `Update Available`,
+    detail: `Current version: ${currentVersion}\nLatest version: ${info.version}\n\nWould you like to install the latest version?`,
+    buttons: ['Install Now', 'Install Later'],
     defaultId: 0,
     cancelId: 1
   }).then((result) => {
     if (result.response === 0) {
-      // User clicked "Download"
+      // User clicked "Install Now"
       autoUpdater.downloadUpdate();
       sendStatusToWindow('Downloading update...');
     }
@@ -196,6 +273,16 @@ autoUpdater.on('update-available', (info) => {
 autoUpdater.on('update-not-available', (info) => {
   console.log('Update not available:', info);
   sendStatusToWindow('App is up to date.');
+  
+  // Show dialog when checking from menu
+  if (mainWindow) {
+    dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'No Updates',
+      message: 'You are using the latest version.',
+      buttons: ['OK']
+    });
+  }
 });
 
 autoUpdater.on('error', (err) => {
